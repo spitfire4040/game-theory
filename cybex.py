@@ -12,6 +12,7 @@ Sc = 0.0    # set initial value for Sc
 Sf = 0.0    # set initial value for Sf
 x = 0.01   	# set cost per GB for processing
 Q = 0.0     # set initial value for Q
+R = 0.0		# set initial value for R
 Ra = 0.0    # set initial value for Ra
 r = 0.0     # set initial value for r
 a = 1		# scaling factor for sharing utility
@@ -22,7 +23,7 @@ c = 1		# cost charged by CYBEX for participation
 if not os.path.isfile('/home/jay/Desktop/cybex.txt'):
 
 	# prompt user for initial investment level if 1st run
-	I = input("Enter the amount of your own security investment: ")
+	I = float(input("Enter the amount of your own security investment: "))
 else:
 	with open('/home/jay/Desktop/cybex.txt', 'r') as infile:
 		input_list = []
@@ -38,19 +39,20 @@ else:
 # prompt user for investment, amount, and quality of data to be shared
 change = input("Would you like to change your initial investment? 1-yes, 2-no: ")
 if change == 1:
-	I = input("Enter the amount of your own security investment: ")	
-s = input("Enter amount in GB to share: ")
-q = input("Enter avg. quality (.1-10): ")
+	I = float(input("Enter the amount of your own security investment: "))
+s = float(input("Enter amount in GB to share: "))
+q = float(input("Enter avg. quality (.001-1): "))
 
 # update average quality of data in CYBEX
 Q = ((Q * Sc) + (q * s))/(Sc + s)
 
 # calculate risk multiplier for firm based on investment level and amount of data shared
-#r = float((s * I) / 100)
-r = ((s) / I)
+r1 = (1 / I)
+r2 = (s * (1/q))
+R = (r1 * r2)
 
 # update averate risk level for firm
-Ra = ((Ra * Sf) + (r * s)) / (Sf + s)
+Ra = ((Ra * Sf) + (R * s)) / (Sf + s)
 
 # processing cost for current transaction
 X = (x * s)
@@ -74,20 +76,44 @@ else:
 # calculate not sharing utility
 noshare = a * math.log10(1 + I)
 
+
+## output for testing
+# print('****************************')
+# print('s: ',s)
+# print('Sc: ',Sc)
+# print('Sf: ',Sf)
+# print('X: ',X)
+# print('x: ',x)
+# print('q: ',q)
+# print('Q: ',Q)
+# print('r1: ',r1)
+# print('r2: ',r2)
+# print('R: ',R)
+# print('Ra: ',Ra)
+# print('a: ',a)
+# print('b: ',b)
+# print('c: ',c)
+# print('I: ',I)
+# print('V1: ',V1)
+# print('V2: ',V2)
+# print('share: ',share)
+# print('noshare: ',noshare)
+# print('****************************')
+
 # print results
-print '************************************'
-print 'Current Value of CYBEX (V1): ',V1
-print 'Current Value of Firm (V2): ',V2
-print 'Initial Investment: ',I
-print 'Average Quality in CYBEX',Q
-print 'Total Shared Data by Firm: ',Sf
-print 'Total Shared Data in CYBEX: ',Sc
-print 'Current Risk for Firm: ',r
-print 'Average Risk for Firm: ',Ra
-print 'Processing Cost: ',X
-print 'Utility for Sharing: ',share
-print 'Utility for Not Sharing: ',noshare
-print '************************************'
+print('************************************')
+print('Current Value of CYBEX (V1): ',V1)
+print('Current Value of Firm (V2): ',V2)
+print('Initial Investment: ',I)
+print('Average Quality in CYBEX',Q)
+print('Total Shared Data by Firm: ',Sf)
+print('Total Shared Data in CYBEX: ',Sc)
+print('Current Risk for Firm: ',R)
+print('Average Risk for Firm: ',Ra)
+print('Processing Cost: ',X)
+print('Utility for Sharing: ',share)
+print('Utility for Not Sharing: ',noshare)
+print('************************************')
 
 # if value is greater than 0
 if V1 > 0 and V2 > 0:
@@ -105,7 +131,7 @@ if V1 > 0 and V2 > 0:
 	plt.show()
 
 else:
-	print 'No utility, value is less than zero'
+	print('No utility, value is less than zero')
 
 with open('/home/jay/Desktop/cybex.txt','w') as outfile:
 	outfile.write(str(I) + '\n')
