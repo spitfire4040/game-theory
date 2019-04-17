@@ -4,27 +4,30 @@ import os
 import math
 import pickle
 import matplotlib.pyplot as plt
+import csv
 
 players = [0,1,2,3,4,5,6,7,8,9]
 val_array = []
 
+# initialize variables
+Sc = 0.0    # set initial value for Sc
+Sf = 0.0    # set initial value for Sf
+x = 0.01   	# set cost per GB for processing
+Q = 0.0     # set initial value for Q
+R = 0.0		# set initial value for R
+Ra = 0.0    # set initial value for Ra
+r1 = 0.0     # set initial value for r
+r2 = 0.0
+a = 1		# scaling factor for sharing utility
+b = 1		# scaling factor for value
+c = 1		# cost charged by CYBEX for participation
+round = 0	# initialize round in game
+
 def calculate(I,s,q):
-	round = 0
+	global round,Sc,Sf,Q,R,Ra,r,a,b,c,x
 
 	for x in range(0,10):
 		for player in players:
-
-			# initialize variables
-			Sc = 0.0    # set initial value for Sc
-			Sf = 0.0    # set initial value for Sf
-			x = 0.01   	# set cost per GB for processing
-			Q = 0.0     # set initial value for Q
-			R = 0.0		# set initial value for R
-			Ra = 0.0    # set initial value for Ra
-			r = 0.0     # set initial value for r
-			a = 1		# scaling factor for sharing utility
-			b = 1		# scaling factor for value
-			c = 1		# cost charged by CYBEX for participation
 
 			# open file and insert previous values
 			if not os.path.isfile('/home/jay/game-theory/cybex.txt'):
@@ -79,16 +82,6 @@ def calculate(I,s,q):
 			else:
 				share = (V2 - V1) * (a * math.log10(1 + I)) - x - c   # value is the difference between CYBEX value and my value
 
-			# calculate not sharing utility
-			noshare = a * math.log10(1 + I)
-
-			# if share > noshare:
-			# 	print('Player-' + str(player) + ' chooses to share')
-			# else:
-			# 	print('Player-' + str(player) + ' chooses not to share')
-			print('player-' + str(player) + ' share = ',share)
-			print('player-' + str(player) + ' noshare = ',noshare)
-
 			# write current values out to file
 			with open('/home/jay/game-theory/cybex.txt','w') as outfile:
 				outfile.write(str(Q) + '\n')
@@ -99,19 +92,22 @@ def calculate(I,s,q):
 				outfile.write(str(Sf) + '\n')
 
 			# save amount and quality of database to file as tuple list
-			val_array.append((Sc,round))
+			val_array.append((round,player,I,s,q,Sc,Sf,Q,Ra,c,x))
 			round += 1
 
 			with open('/home/jay/game-theory/cybex_value.txt', 'wb') as outfile:
 				pickle.dump(val_array, outfile)
 
 def graph():
-	with open('/home/jay/game-theory/cybex_value.txt', 'rb') as infile:
-		graph_array = pickle.load(infile)
-		print(graph_array)
-		zip(*graph_array)
-		plt.scatter(*zip(*graph_array))
-		plt.show()
+	# global variables
+	global round,player,I,s,q,Sc,Sf,Q,R,Ra,r1,r2,a,b,c,x
+
+	# create .csv file from data
+	with open('/home/jay/game-theory/cybex_value.csv', 'w') as csvFile:
+		writer = csv.writer(csvFile)
+		writer.writerow(("round","player","invest.","quantity","quality","q-cybex","q-firm","av-quality","av-risk","cost-cybex","cost-proc"))
+		writer.writerows(val_array)
+	csvFile.close()
 
 
 def main(argv):
@@ -123,3 +119,8 @@ def main(argv):
 
 if __name__ == '__main__':
 	main(sys.argv)
+
+#tuple example
+#(player,I,s,q,Q,Sc,Sf,R,Ra,r1,r2,c,x)
+#(round#,investment,quantity,quality,average-quality,quantity-in-cybex,quantity-in-firm,
+#current-risk-sum,average-risk,risk-investment,risk-quantity,scaling-factor-value,scaling-factor-value,cybex-cost,processing-cost)
