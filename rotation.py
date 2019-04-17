@@ -1,14 +1,15 @@
 from __future__ import division
 import sys
 import os
-import matplotlib.pyplot as plt; plt.rcdefaults()
-import numpy as np
-import matplotlib.pyplot as plt
 import math
+import pickle
+import matplotlib.pyplot as plt
 
 players = [0,1,2,3,4,5,6,7,8,9]
+val_array = []
 
 def calculate(I,s,q):
+	round = 0
 
 	for x in range(0,10):
 		for player in players:
@@ -26,10 +27,10 @@ def calculate(I,s,q):
 			c = 1		# cost charged by CYBEX for participation
 
 			# open file and insert previous values
-			if not os.path.isfile('/home/jay/Desktop/cybex.txt'):
+			if not os.path.isfile('/home/jay/game-theory/cybex.txt'):
 				pass
 			else:
-				with open('/home/jay/Desktop/cybex.txt', 'r') as infile:
+				with open('/home/jay/game-theory/cybex.txt', 'r') as infile:
 					input_list = []
 					for line in infile:
 						input_list.append(line)
@@ -37,10 +38,10 @@ def calculate(I,s,q):
 					Q = float(input_list[0])
 					Sc = float(input_list[1])
 
-			if not os.path.isfile('/home/jay/Desktop/' + str(player) + '.txt'):
+			if not os.path.isfile('/home/jay/game-theory/' + str(player) + '.txt'):
 				pass
 			else:
-				with open('/home/jay/Desktop/' + str(player) + '.txt', 'r') as infile:
+				with open('/home/jay/game-theory/' + str(player) + '.txt', 'r') as infile:
 					input_list = []
 					for line in infile:
 						input_list.append(line)
@@ -86,19 +87,39 @@ def calculate(I,s,q):
 			# else:
 			# 	print('Player-' + str(player) + ' chooses not to share')
 			print('player-' + str(player) + ' share = ',share)
-			print('player-' + str(player) + ' share = ',noshare)
+			print('player-' + str(player) + ' noshare = ',noshare)
 
 			# write current values out to file
-			with open('/home/jay/Desktop/cybex.txt','w') as outfile:
+			with open('/home/jay/game-theory/cybex.txt','w') as outfile:
 				outfile.write(str(Q) + '\n')
 				outfile.write(str(Sc) + '\n')
 
-			with open('/home/jay/Desktop/firm-' + str(player) + '.txt', 'w') as outfile:
+			with open('/home/jay/game-theory/firm-' + str(player) + '.txt', 'w') as outfile:
 				outfile.write(str(Ra) + '\n')
 				outfile.write(str(Sf) + '\n')
 
+			# save amount and quality of database to file as tuple list
+			val_array.append((Sc,round))
+			round += 1
+
+			with open('/home/jay/game-theory/cybex_value.txt', 'wb') as outfile:
+				pickle.dump(val_array, outfile)
+
+def graph():
+	with open('/home/jay/game-theory/cybex_value.txt', 'rb') as infile:
+		graph_array = pickle.load(infile)
+		print(graph_array)
+		zip(*graph_array)
+		plt.scatter(*zip(*graph_array))
+		plt.show()
+
+
 def main(argv):
-	calculate(1000,25,1)
+	I = float(argv[1])
+	s = float(argv[2])
+	q = float(argv[3])
+	calculate(I,s,q)
+	graph()
 
 if __name__ == '__main__':
 	main(sys.argv)
