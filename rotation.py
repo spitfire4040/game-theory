@@ -28,7 +28,8 @@ round = 0	# initialize round in game
 def calculate(I,s,q):
 	global round,Sc,Sf,Q,R,Ra,r,a,b,c,x,V1,V2
 
-	for x in range(0,10):
+#	for x in range(0,10):
+	for x in range(0,1):
 		for player in players:
 
 			# open file and insert previous values
